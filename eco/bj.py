@@ -6,7 +6,6 @@ from disnake.utils import *
 from eco.func.func import *
 
 bot = commands.InteractionBot()
-
 bjcashe = {}
 
 class BjSystem(disnake.ui.View):
