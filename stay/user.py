@@ -33,7 +33,7 @@ class UserCommand(commands.Cog):
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.user)
     @bot.slash_command(description="Узнать свой или чужой баланс")
     @commands.guild_only()
-    async def user(self, ctx, user: disnake.User=None):
+    async def balance(self, ctx, user: disnake.User=None):
             if user == None:
                 user=ctx.author
                 id = user.id

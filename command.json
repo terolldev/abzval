@@ -1,1 +1,1 @@
-{"commands": ["help", "stats", "dev_stats", "bj", "check", "showbjcashe"]}
+{"commands": ["help", "stats", "dev_stats", "bj", "check", "showbjcashe", "crypto", "crypto_pay", "crypto_sell", "crypto_buy", "pay", "settings"]}

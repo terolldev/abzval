@@ -56,8 +56,8 @@ class PayCommand(commands.Cog):
                     embed.set_author(name='Извините', icon_url='https://cdn.discordapp.com/attachments/959338373988900934/959396824173658132/749876351628083221.gif')
                     embed.set_footer(text=f"{ctx.author}", icon_url=f"{inter.author.avatar}")
                     await inter.response.send_message(embed=embed, ephemeral=True)
-                elif money > 100000:
-                    embed=disnake.Embed(description=f"**Причина:**\n> Укажите число меньше 100,000!",
+                elif money > check_server_bd(inter.guild.id)[9]:
+                    embed=disnake.Embed(description=f"**Причина:**\n> Укажите число меньше {int(check_server_bd(inter.guild.id)[9]):,}!",
                     color=check_server_bd(inter.guild.id)[1], timestamp=datetime.datetime.now())
                     embed.set_author(name='Извините', icon_url='https://cdn.discordapp.com/attachments/959338373988900934/959396824173658132/749876351628083221.gif')
                     embed.set_footer(text=f"{inter.author}", icon_url=f"{inter.author.avatar}")

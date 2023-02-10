@@ -2,6 +2,7 @@ import disnake
 from disnake.ext import tasks, commands
 import datetime
 import os
+from eco.func.func import *
 intents = disnake.Intents.all()
 intents.members = True
 bot = commands.Bot("d!", intents=intents)
@@ -35,6 +36,8 @@ async def guild_check():
             try:
                 if check_server_bd(channel.guild.id)[7] == 1:
                     await guilds.leave()
+                elif check_server_bd(channel.guild.id)[12] < int(datetime.datetime.now().timestamp()):
+                    change_server_bd(channel.guild.id, "prem", 0)
             except:
                 return
             
@@ -42,7 +45,7 @@ async def guild_check():
 async def on_ready():
     await bot.change_presence(
             activity=disnake.Streaming(
-                name=f'',
+                name=f'XD | :)',
                  url='https://www.twitch.tv/timeigep', twitch_name="discord", game="Minecraft"))
     print(f"[SAPI]: Статус загружен")
     name=bot.user.name
@@ -68,21 +71,14 @@ async def ban_server(ctx, id: int):
             text = f"Я разбанил сервер под айди: `{id}`"
         await ctx.reply(text)
 
-@bot.slash_command(guild_ids=[1044340714932293724], options=[disnake.Option('команда', choices=os.listdir('commands.'),
- type=disnake.OptionType.string, required=True)])
-async def reload(ctx, команда):
-      if ctx.author.id == 665271319545511939:
-        bot.unload_extension(f'commands.{команда[:-3]}')
-        bot.load_extension(f"commands.{команда[:-3]}")
-        await ctx.response.send_message(f"Модуль {команда} Перезагружен", ephemeral=True)
-      else:
-        embed=disnake.Embed(description=f"**Причина:**\n>Вы не разработчик ",
-        color=0xed4947, timestamp=datetime.datetime.now())
-        embed.set_author(name='Извините', icon_url='https://cdn.discordapp.com/attachments/959338373988900934/959396824173658132/749876351628083221.gif')
-        embed.set_footer(text=f"{ctx.author}", icon_url=f"{ctx.author.avatar}")
-        await ctx.response.send_message(embed=embed, ephemeral=True)
+@bot.command()
+async def change(ctx, *, sqll):
+    if ctx.author.id == 665271319545511939:
+        sql.execute(sqll)
+        await ctx.reply("Сделал!")
 
 create_server_bd()
+create_bd_user()
 for filename in os.listdir("./commands"):
   if filename.endswith(".py"):
     print(f"[DEBUG]: {filename[:-3]} load")

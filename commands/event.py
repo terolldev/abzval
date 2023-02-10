@@ -28,12 +28,12 @@ class Events(commands.Cog):
         try:
             if interaction.component.custom_id == "MAINPURSE":
                 await interaction.response.send_message(embed=disnake.Embed(title=f"{interaction.message.content} Подтверждённый пользователь", description=f"Администрация сервера подтвердила что {interaction.message.content} является верифицированным лицом", color=check_server_bd(interaction.guild.id)[2]), ephemeral=True)
-            # else:
-            #     embed=disnake.Embed(description=f"**Причина:**\n> Данное взаимодействие более не доступно!",
-            #     color=check_server_bd(interaction.guild.id)[1], timestamp=datetime.datetime.now())
-            #     embed.set_author(name='Извините', icon_url='https://cdn.discordapp.com/attachments/959338373988900934/959396824173658132/749876351628083221.gif')
-            #     embed.set_footer(text=f"{interaction.author}", icon_url=f"{interaction.author.avatar}")
-            #     await interaction.response.send_message(embed=embed, ephemeral=True)
+            else:
+                embed=disnake.Embed(description=f"**Причина:**\n> Данное взаимодействие более не доступно!",
+                color=check_server_bd(interaction.guild.id)[1], timestamp=datetime.datetime.now())
+                embed.set_author(name='Извините', icon_url='https://cdn.discordapp.com/attachments/959338373988900934/959396824173658132/749876351628083221.gif')
+                embed.set_footer(text=f"{interaction.author}", icon_url=f"{interaction.author.avatar}")
+                await interaction.response.send_message(embed=embed, ephemeral=True)
         except Exception as er:
             embed=disnake.Embed(description=f"**Причина:**\n> Ошибка ответа на взаимодействие!",
             color=check_server_bd(interaction.guild.id)[1], timestamp=datetime.datetime.now())
@@ -47,6 +47,7 @@ class Events(commands.Cog):
         createbd(ctx.guild.id)
         create_bd_cuscom(ctx.guild.id)
         int_server_bd(ctx.guild.id)
+        int_user_bd(ctx.author.id)
         create(ctx.guild.id, ctx.author.id, 10)
         e = ctx.application_command.qualified_name
         if e == 'user' and 'crypto' and 'jack' and 'didan' and 'майнинг':
@@ -65,6 +66,7 @@ class Events(commands.Cog):
         create_bd(ctx.guild.id)
         create(ctx.guild.id, ctx.author.id, 10)
         int_server_bd(ctx.guild.id)
+        int_user_bd(ctx.author.id)
         if ctx.content.startswith("b!") == True:
             commandName = ctx.content.replace("b!", "").split(" ")[0].lower()
             commandReply = check_command(ctx.guild.id, commandName)

@@ -79,6 +79,15 @@ def create_bd_cuscom(ids):
     description TEXT
     )""")
 
+def create_bd_user():
+    sql.execute(f"""CREATE TABLE IF NOT EXISTS globaluser (
+    id BIGINT,
+    prems INT,
+    ban INT,
+    mod INT,
+    tester INT
+    )""")
+
 def create_server_bd():
     sql.execute(f"""CREATE TABLE IF NOT EXISTS global (
     id BIGINT,
@@ -89,25 +98,46 @@ def create_server_bd():
     prem INT,
     eco INT,
     ban INT,
-    item INT
+    item INT,
+    limitcash BIGINT,
+    limitbit BIGINT,
+    limitcoin BIGINT,
+    enddate BIGINT
     )
     """)
 
-def int_server_bd(ids: int) -> object:
+def int_server_bd(ids: int):
     sql.execute(f"SELECT id FROM global WHERE id = ?", (ids,))
     if sql.fetchone() is None:
-        sql.execute(f"INSERT INTO global VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, 0xed4947, 0x5865F2, 1, 0, 0, 1, 0, 1))
+        sql.execute(f"INSERT INTO global VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, 0xed4947, 0x5865F2, 1, 0, 0, 1, 0, 1, 100_000, 1_000, 100, 0))
     db.commit()
 
-def change_server_bd(ids: int, type: str, value):
+def int_user_bd(id: int):
+    sql.execute(f"SELECT id FROM globaluser WHERE id = ?", (id,))
+    if sql.fetchone() is None:
+        sql.execute(f"INSERT INTO globaluser VALUES (?, ?, ?, ?, ?)", (id, 0, 0, 0, 0 ))
+    db.commit()
+
+def change_server_bd(ids: int, type: str, value: str | int):
     sql.execute(f"SELECT id FROM global WHERE id = ?", (ids,))
     if sql.fetchone() is None:
-        sql.execute(f"INSERT INTO global VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, 0xed4947, 0x5865F2, 1, 0, 0, 1, 0, 1))
+        sql.execute(f"INSERT INTO global VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, 0xed4947, 0x5865F2, 1, 0, 0, 1, 0, 1, 100_000, 1_000, 100, "undefined"))
     sql.execute(f"UPDATE global SET {type} = {value} WHERE id = ?", (ids,))
+    db.commit()
+
+def change_user_bd(id: int, type: str, value: str | int):
+    sql.execute(f"SELECT id FROM globaluser WHERE id = ?", (id,))
+    if sql.fetchone() is None:
+        sql.execute(f"INSERT INTO globaluser VALUES (?, ?, ?, ?, ?)", (id, 0, 0, 0, 0 ))
+    sql.execute(f"UPDATE globaluser SET {type} = {value} WHERE id = ?", (id,))
     db.commit()
 
 def check_server_bd(ids: int) -> object:
     for value in sql.execute(f"SELECT * FROM global WHERE id = ?", (ids,)):
+        return value
+
+def check_user_bd(id: int) -> object:
+    for value in sql.execute(f"SELECT * FROM globaluser WHERE id = ?", (id,)):
         return value
 
 def check_command(ids, name) -> object:
@@ -159,6 +189,7 @@ def fora(text: str, ctx: disnake.Message) -> str:
         text11 = text11.replace("create_bd_cuscom(", "")
         text11 = text11.replace("change_server_bd", "")
         text11= text11.replace("int_server_bd", "")
+        text11= text11.replace("int_user_bd", "")
         text11 = text.replace(oldtext, str(eval(text11)))
         text1 = text11.replace('{', '')
         text1 = text1.replace('}', '')
