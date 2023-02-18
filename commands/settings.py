@@ -153,6 +153,41 @@ class Set(disnake.ui.View):
         if interaction.user.id == interaction.author.id:
             await interaction.response.send_modal(Limit(interaction))
 
+class Set2(disnake.ui.View):
+    def __init__(self):
+        super().__init__(timeout=60)
+
+    @disnake.ui.button(label="Цвет сообщений", disabled=True, style=disnake.ButtonStyle.blurple, emoji="🔵")
+    async def mes(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+        if interaction.user.id == interaction.author.id:
+            await interaction.response.send_modal(Val1())
+
+    @disnake.ui.button(label="Цвет ошибок", disabled=True, style=disnake.ButtonStyle.red, emoji="🔴")
+    async def err(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+        if interaction.user.id == interaction.author.id:
+            await interaction.response.send_modal(Val())
+
+    @disnake.ui.button(label="Включение/Выключение польз", style=disnake.ButtonStyle.gray, emoji="🔘", row=1)
+    async def on_off(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+        if interaction.user.id == interaction.author.id:
+            check = str(check_server_bd(interaction.guild.id)[4]).replace("0", "Выключено").replace("1", "Включено")
+            embed=disnake.Embed(
+            title=f"Настройки сервера [{interaction.guild.name}]",
+                color=check_server_bd(interaction.guild.id)[2]
+            )
+            embed.add_field(name=f"Цвет обычных сообщение", value=f"{check_server_bd(interaction.guild.id)[2]}", inline=True)
+            embed.add_field(name=f"Цвет ошибок", value=f"{check_server_bd(interaction.guild.id)[1]}", inline=True)
+            embed.add_field(name=f"Включены ли польз.команды?", value=check, inline=True)
+            embed.add_field(name=f"Поддержка слешей?", value=check, inline=True)
+            lim = check_server_bd(interaction.guild.id)
+            embed.add_field(name=f"Лимиты", value=f"```py\nДеньги: {int(lim[9]):,}\nБит-Коины: {int(lim[10]):,}\nКоины: {int(lim[11]):,}\n```", inline=True)
+            await interaction.response.edit_message(embed=embed)
+                
+    @disnake.ui.button(label="Изменить лимиты", style=disnake.ButtonStyle.green, emoji="⚠")
+    async def limit(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+        if interaction.user.id == interaction.author.id:
+            await interaction.response.send_modal(Limit(interaction))
+
 class SettingsCommand(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -172,7 +207,10 @@ class SettingsCommand(commands.Cog):
         embed.add_field(name=f"Поддержка слешей?", value=check, inline=True)
         lim = check_server_bd(inter.guild.id)
         embed.add_field(name=f"Лимиты", value=f"```py\nДеньги: {int(lim[9]):,}\nБит-Коины: {int(lim[10]):,}\nКоины: {int(lim[11]):,}\n```", inline=True)
-        await inter.response.send_message(embed=embed, view=Set(), ephemeral=1)
+        gui = Set()
+        if check_server_bd(inter.guild.id)[5] == 0:
+            gui = Set2()
+        await inter.response.send_message(embed=embed, view=gui, ephemeral=1)
 
 def setup(bot: commands.Bot):
     bot.add_cog(SettingsCommand(bot))

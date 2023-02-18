@@ -5,6 +5,16 @@ from eco.func.func import *
 
 bot = commands.InteractionBot()
 
+class UserUI(disnake.ui.View):
+    def __init__(self, user: list):
+        super().__init__()
+        if user[3] == 1:
+            self.add_item(disnake.ui.Button(label=None, custom_id="dev", emoji="<:dev:1076038119893237801>", style=disnake.ButtonStyle.gray, disabled=False))
+            # if user[4]:
+            #     self.add_item(disnake.ui.Button(label=None, custom_id="mod", emoji="<:mod:1076038124041408557>", style=disnake.ButtonStyle.gray, disabled=False))
+        if user[4] == 1:
+            self.add_item(disnake.ui.Button(label=None, custom_id="mod", emoji="<:mod:1076038124041408557>", style=disnake.ButtonStyle.gray, disabled=False))
+
 class USer1Command(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -23,12 +33,9 @@ class USer1Command(commands.Cog):
             embed.set_footer(text=f"{inter.author}", icon_url=f"{inter.author.avatar}")
             await inter.response.send_message(embed=embed, ephemeral=True)
         else:
-            embed=disnake.Embed(title="Информация", description=f"`[`{inter.author.mention}`]`", color=check_server_bd(inter.guild.id)[2])
+            embed=disnake.Embed(title=f"Информация", description=f"`[`{inter.author.mention}`]`", color=check_server_bd(inter.guild.id)[2])
             embed.add_field(name="Кол-во бонусов", value=f"{user[1]}", inline=False)
-            embed.add_field(name="Блокировка?", value=f"{bool(user[2])}", inline=True)
-            embed.add_field(name="Модератор?", value=f"{bool(user[3])}", inline=True)
-            embed.add_field(name="Тестирует функции?", value=f"{bool(user[4])}", inline=True)
-            await inter.response.send_message(embed=embed)
+            await inter.response.send_message(f"{inter.author}", embed=embed, view=UserUI(user))
 
 
 def setup(bot: commands.Bot):

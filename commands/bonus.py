@@ -32,9 +32,9 @@ class BonusCommand(commands.Cog):
             await inter.response.send_message(embed=embed, ephemeral=True)
         else:
             if check_server_bd(inter.guild.id)[12] == 0:
-                dateman = int(datetime.datetime.now().timestamp()+2592000)
+                dateman = int(datetime.datetime.now().timestamp()+2419200)
             else:
-                dateman = int(check_server_bd(inter.guild.id)[12]+2592000)
+                dateman = int(check_server_bd(inter.guild.id)[12]+2419200)
             change_server_bd(inter.guild.id, "enddate", dateman)
             change_user_bd(inter.author.id, "prems", int(check_user_bd(inter.author.id)[1]-1))
             change_server_bd(inter.guild.id, "prem", 1)

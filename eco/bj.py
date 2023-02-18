@@ -14,60 +14,59 @@ class BjSystem(disnake.ui.View):
 
     @disnake.ui.button(custom_id="bjb", label="Взять", style=disnake.ButtonStyle.green)
     async def take_button(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-                    card = random.randint(4, 10)
-                    bjcashe.update({interaction.author.id: [bjcashe[interaction.author.id][0]+card, bjcashe[interaction.author.id][1], bjcashe[interaction.author.id][2]]})
-                    card1 = random.randint(4, 10)
-                    bjcashe.update({interaction.author.id: [bjcashe[interaction.author.id][0], bjcashe[interaction.author.id][1]+card1, bjcashe[interaction.author.id][2]]})
-                    if bjcashe[interaction.author.id][0] == bjcashe[interaction.author.id][1]:
-                        embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Ничья\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
-                        newcash = check(interaction.guild.id, interaction.author.id, "cash") - bjcashe[interaction.author.id][2]
-                        sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")
-                        db.commit()
-                        embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
-                        bjcashe.pop(interaction.author.id)
-                        await interaction.response.edit_message(embed=embed, view=None)
+        card = random.randint(4, 10)
+        bjcashe.update({interaction.author.id: [bjcashe[interaction.author.id][0]+card, bjcashe[interaction.author.id][1], bjcashe[interaction.author.id][2]]})
+        card1 = random.randint(4, 10)
+        bjcashe.update({interaction.author.id: [bjcashe[interaction.author.id][0], bjcashe[interaction.author.id][1]+card1, bjcashe[interaction.author.id][2]]})
+        if bjcashe[interaction.author.id][0] == bjcashe[interaction.author.id][1]:
+                embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Ничья\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
+                newcash = check(interaction.guild.id, interaction.author.id, "cash") - bjcashe[interaction.author.id][2]
+                sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")
+                db.commit()
+                embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
+                bjcashe.pop(interaction.author.id)
+                await interaction.response.edit_message(embed=embed, view=None)
+        elif bjcashe[interaction.author.id][1] == 21:
+                date = bjcashe[interaction.author.id]
+                embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Увы вы проиграли\n\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
+                newcash = check(interaction.guild.id, interaction.author.id, "cash") - bjcashe[interaction.author.id][2]
+                sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")
+                db.commit()
+                embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
+                bjcashe.pop(interaction.author.id)
+                await interaction.response.edit_message(embed=embed, view=None)
 
-                    elif bjcashe[interaction.author.id][1] == 21:
-                        date = bjcashe[interaction.author.id]
-                        embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Увы вы проиграли\n\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
-                        newcash = check(interaction.guild.id, interaction.author.id, "cash") - bjcashe[interaction.author.id][2]
-                        sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")
-                        db.commit()
-                        embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
-                        bjcashe.pop(interaction.author.id)
-                        await interaction.response.edit_message(embed=embed, view=None)
-
-                    elif bjcashe[interaction.author.id][1] > 21:
-                        date = bjcashe[interaction.author.id]
-                        embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Вы выйграли\n\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
-                        newcash = check(interaction.guild.id, interaction.author.id, "cash") + bjcashe[interaction.author.id][2]
-                        sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")
-                        db.commit()
-                        embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
-                        bjcashe.pop(interaction.author.id)
-                        await interaction.response.edit_message(embed=embed, view=None)
-                    elif bjcashe[interaction.author.id][0] == 21:
-                        date = bjcashe[interaction.author.id]
-                        embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Вы выйграли\n\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
-                        newcash = check(interaction.guild.id, interaction.author.id, "cash") + bjcashe[interaction.author.id][2]
-                        sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")
-                        db.commit()
-                        embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
-                        bjcashe.pop(interaction.author.id)
-                        await interaction.response.edit_message(embed=embed, view=None)
-                    elif bjcashe[interaction.author.id][0] > 21:
-                        date = bjcashe[interaction.author.id]
-                        embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Увы у вас перебор\n\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
-                        newcash = check(interaction.guild.id, interaction.author.id, "cash") - bjcashe[interaction.author.id][2]
-                        sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")
-                        db.commit()
-                        embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
-                        bjcashe.pop(interaction.author.id)
-                        await interaction.response.edit_message(embed=embed, view=None)
-                    elif bjcashe[interaction.author.id][0] < 21:
-                        date = bjcashe[interaction.author.id]
-                        embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"У вас не перебор\n\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
-                        await interaction.response.edit_message(embed=embed)
+        elif bjcashe[interaction.author.id][1] > 21:
+                date = bjcashe[interaction.author.id]
+                embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Вы выйграли\n\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
+                newcash = check(interaction.guild.id, interaction.author.id, "cash") + bjcashe[interaction.author.id][2]
+                sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")
+                db.commit()
+                embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
+                bjcashe.pop(interaction.author.id)
+                await interaction.response.edit_message(embed=embed, view=None)
+        elif bjcashe[interaction.author.id][0] == 21:
+                date = bjcashe[interaction.author.id]
+                embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Вы выйграли\n\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
+                newcash = check(interaction.guild.id, interaction.author.id, "cash") + bjcashe[interaction.author.id][2]
+                sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")
+                db.commit()
+                embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
+                bjcashe.pop(interaction.author.id)
+                await interaction.response.edit_message(embed=embed, view=None)
+        elif bjcashe[interaction.author.id][0] > 21:
+                date = bjcashe[interaction.author.id]
+                embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Увы у вас перебор\n\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
+                newcash = check(interaction.guild.id, interaction.author.id, "cash") - bjcashe[interaction.author.id][2]
+                sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")
+                db.commit()
+                embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
+                bjcashe.pop(interaction.author.id)
+                await interaction.response.edit_message(embed=embed, view=None)
+        elif bjcashe[interaction.author.id][0] < 21:
+                date = bjcashe[interaction.author.id]
+                embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"У вас не перебор\n\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
+                await interaction.response.edit_message(embed=embed)
     
     
     @disnake.ui.button(custom_id="bjstay", label="Остановится", style=disnake.ButtonStyle.gray)
@@ -105,7 +104,6 @@ class BjSystem(disnake.ui.View):
             db.commit()
             embed.set_footer(text=f"Ваш новый баланс: {int(newcash):,} $")
             await interaction.response.edit_message(embed=embed, view=None)
-
         bjcashe.pop(interaction.author.id)
 
 class Bjcommand(commands.Cog):

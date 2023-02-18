@@ -129,6 +129,7 @@ class Handler(commands.Cog):
                 #await interaction.followup.send(embed=embed)
                 await interaction.response.send_message(embed=embed, ephemeral=True)
         interaction.application_command.reset_cooldown(interaction) 
+        
     @commands.Cog.listener()
     async def on_command_error(cog, ctx, error):
         if ctx.author.id == 665271319545511939: await ctx.reply(error)

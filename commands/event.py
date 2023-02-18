@@ -28,6 +28,16 @@ class Events(commands.Cog):
         try:
             if interaction.component.custom_id == "MAINPURSE":
                 await interaction.response.send_message(embed=disnake.Embed(title=f"{interaction.message.content} Подтверждённый пользователь", description=f"Администрация сервера подтвердила что {interaction.message.content} является верифицированным лицом", color=check_server_bd(interaction.guild.id)[2]), ephemeral=True)
+            elif interaction.component.custom_id == "dev":
+                await interaction.response.send_message(
+                embed=disnake.Embed(title=f"{interaction.message.content} Является разработчиком бота", 
+                description=f"Данный пользователь разработчик бота, или-же со-создатель", 
+                color=check_server_bd(interaction.guild.id)[2]), ephemeral=True)
+            elif interaction.component.custom_id == "mod":
+                await interaction.response.send_message(
+                embed=disnake.Embed(title=f"{interaction.message.content} Является модератором бота", 
+                description=f"Данный пользователь модератор бота", 
+                color=check_server_bd(interaction.guild.id)[2]), ephemeral=True)
             else:
                 embed=disnake.Embed(description=f"**Причина:**\n> Данное взаимодействие более не доступно!",
                 color=check_server_bd(interaction.guild.id)[1], timestamp=datetime.datetime.now())

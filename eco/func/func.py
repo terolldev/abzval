@@ -1,6 +1,6 @@
 import os
 import datetime
-import random
+from script.event import *
 import sqlite3
 import disnake
 bd = 'bd.db'
@@ -27,6 +27,7 @@ def create(ids: int, id: int, tot: int):
         cris = 0
         sql.execute(f"INSERT INTO user{ids} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (id, tot, bit, bam, prem, exp, bitmine, man, f"{datetime.datetime.now()}", coin, pay, ver, show, cris))
         db.commit()
+        event("INT_TABLE", ids)
     else:
         return
     db.commit()
@@ -41,8 +42,10 @@ class ValueinBd():
     }
 
 def check(ids: int, id: int, type: str):
+    event("SELECT", ids)
     for val in sql.execute(f"SELECT {type} FROM user{ids} WHERE id = ?", (id,)): # type: ignore
-        return val[0]
+        if type == "*":return val
+        else:return val[0]
 
 def create_bd(id):
     sql.execute(f"""CREATE TABLE IF NOT EXISTS atrib{id} (
@@ -71,6 +74,16 @@ def createbd(ids: int):
     show INT,
     cris BIGINT
 )""")
+
+def create_bd_anw(ids):
+    sql.execute(f"""CREATE TABLE IF NOT EXISTS anw{ids} (
+    name TEXT,
+    des TEXT,
+    for TEXT,
+    count BIGINT,
+    forg TEXT,
+    countg BIGINT
+    )""")
 
 def create_bd_cuscom(ids):
     sql.execute(f"""CREATE TABLE IF NOT EXISTS cuscom{ids} (
@@ -102,15 +115,21 @@ def create_server_bd():
     limitcash BIGINT,
     limitbit BIGINT,
     limitcoin BIGINT,
-    enddate BIGINT
+    enddate BIGINT,
+    welcome TEXT,
+    goodboy TEXT,
+    channel BIGINT
     )
     """)
 
 def int_server_bd(ids: int):
     sql.execute(f"SELECT id FROM global WHERE id = ?", (ids,))
     if sql.fetchone() is None:
-        sql.execute(f"INSERT INTO global VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, 0xed4947, 0x5865F2, 1, 0, 0, 1, 0, 1, 100_000, 1_000, 100, 0))
+        sql.execute(f"INSERT INTO global VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, 0xed4947, 0x5865F2, 1, 0, 0, 1, 0, 1,
+        100_000, 1_000, 100, 0, "Привет {username}, мы рады тебя видеть!", "Увы {username} вышел, будет надеется что он вернётся"))
     db.commit()
+    event("INT_TABLE", ids)
+    
 
 def int_user_bd(id: int):
     sql.execute(f"SELECT id FROM globaluser WHERE id = ?", (id,))
@@ -121,13 +140,17 @@ def int_user_bd(id: int):
 def change_server_bd(ids: int, type: str, value: str | int):
     sql.execute(f"SELECT id FROM global WHERE id = ?", (ids,))
     if sql.fetchone() is None:
-        sql.execute(f"INSERT INTO global VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, 0xed4947, 0x5865F2, 1, 0, 0, 1, 0, 1, 100_000, 1_000, 100, "undefined"))
+        event("INT_TABLE")
+        sql.execute(f"INSERT INTO global VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, 0xed4947, 0x5865F2, 1, 0, 0, 1, 0, 1,
+        100_000, 1_000, 100, 0, "Привет {username}, мы рады тебя видеть!", "Увы {username} вышел, будет надеется что он вернётся"))
     sql.execute(f"UPDATE global SET {type} = {value} WHERE id = ?", (ids,))
     db.commit()
+    event("CHANGE_TABLE", ids)
 
 def change_user_bd(id: int, type: str, value: str | int):
     sql.execute(f"SELECT id FROM globaluser WHERE id = ?", (id,))
     if sql.fetchone() is None:
+        event("INT_TABLE")
         sql.execute(f"INSERT INTO globaluser VALUES (?, ?, ?, ?, ?)", (id, 0, 0, 0, 0 ))
     sql.execute(f"UPDATE globaluser SET {type} = {value} WHERE id = ?", (id,))
     db.commit()
@@ -135,6 +158,7 @@ def change_user_bd(id: int, type: str, value: str | int):
 def check_server_bd(ids: int) -> object:
     for value in sql.execute(f"SELECT * FROM global WHERE id = ?", (ids,)):
         return value
+    event("CHECK_TABLE", ids)
 
 def check_user_bd(id: int) -> object:
     for value in sql.execute(f"SELECT * FROM globaluser WHERE id = ?", (id,)):
@@ -143,6 +167,29 @@ def check_user_bd(id: int) -> object:
 def check_command(ids, name) -> object:
     for val in sql.execute(f"SELECT reply, description FROM cuscom{ids} WHERE name = ?", (name,)):
         return val
+    event("CHECK_TABLE", ids)
+
+def create_anw(ids, name, des, fore, count, forg, countg):
+    sql.execute(f"SELECT name FROM anw{ids} WHERE name = ?", (name,))
+    if sql.fetchone() is None:
+        sql.execute(f"INSERT INTO anw{ids} VALUES (?, ?, ?, ?, ?, ?)", (name, des, fore, count, forg, countg))
+    db.commit()
+
+def change_anw(ids, name, type, value):
+    sql.execute(f"SELECT name FROM anw{ids} WHERE name = ?", (name,))
+    if sql.fetchone() is None:
+        return "cin"
+    else:
+        sql.execute(f"UPDATE cuscom{ids} SET {type} = {value} WHERE name = ?", (name,))
+    db.commit()
+
+def delete_anw(ids, name):
+    sql.execute(f"SELECT name FROM anw{ids} WHERE name = ?", (name,))
+    if sql.fetchone() is None:
+        return
+    else:
+        sql.execute(f"DELETE FROM anw{ids} WHERE name = ('{name}')")
+        db.commit()
 
 def create_command(ids, name, reply: str, description: str):
     sql.execute(f"SELECT name FROM cuscom{ids} WHERE name = ?", (name,))
@@ -151,6 +198,7 @@ def create_command(ids, name, reply: str, description: str):
     else:
         return "ciac"
     db.commit()
+    event("INT_TABLE", ids)
     return f"yes"
 
 def change_command(ids, name, newreply, description):
@@ -161,6 +209,7 @@ def change_command(ids, name, newreply, description):
         sql.execute(f"UPDATE cuscom{ids} SET reply = \'{newreply}\' WHERE name = ?", (name,))
         sql.execute(f"UPDATE cuscom{ids} SET description = \'{description}\' WHERE name = ?", (name,))
     db.commit()
+    event("CHANGE_TABLE", ids)
 
 def delete_command(ids, name):
     sql.execute(f"SELECT name FROM cuscom{ids} WHERE name = ?", (name,))
@@ -189,7 +238,8 @@ def fora(text: str, ctx: disnake.Message) -> str:
         text11 = text11.replace("create_bd_cuscom(", "")
         text11 = text11.replace("change_server_bd", "")
         text11= text11.replace("int_server_bd", "")
-        text11= text11.replace("int_user_bd", "")
+        text11= text11.replace("change_user_bd", "")
+        text11= text11.replace("check_user_bd", "")
         text11 = text.replace(oldtext, str(eval(text11)))
         text1 = text11.replace('{', '')
         text1 = text1.replace('}', '')
@@ -201,6 +251,7 @@ def fora(text: str, ctx: disnake.Message) -> str:
 def check_user(ids, id, val: str) -> str:
     for val in sql.execute(f"SELECT {val} FROM atrib{ids} WHERE id = ?", (id,)):
         return val[0]
+    event("CHECK_TABLE", ids)
 
 def change_user(ids, id, val: str):
     sql.execute(f"SELECT id FROM atrib{ids} WHERE id = ?", (id,))
@@ -209,33 +260,40 @@ def change_user(ids, id, val: str):
     else:
         sql.execute(f"UPDATE atrib{ids} SET str = {val} WHERE id = '{id}'")
     db.commit()
+    event("CHANGE_TABLE", ids)
     return f"yes"
 
 def create_use(ids, id):
     sql.execute(f"SELECT id FROM atrib{ids} WHERE id = ?", (id,))
     if sql.fetchone() is None:
         sql.execute(f"INSERT INTO atrib{ids} VALUES (?, ?, ?, ?, ?, ?)", (id, None, None, 0, 0, 0))
+        event("INT_TABLE", ids)
 
 def add_user(ids, id, val: str, value: int):
     sql.execute(f"SELECT id from atrib{ids} WHERE id = ?", (id,))
     if sql.fetchone() is None:
         sql.execute(f"INSERT INTO atrib{ids} VALUES (?, ?, ?, ?, ?, ?)", (id, None, None, 0, 0, 0))
+        event("INT_TABLE", ids)
     else:
         sql.execute(f"UPDATE atrib{ids} SET {val} = {value} WHERE id = '{id}'")
     db.commit()
+    event("CHANGE_TABLE", ids)
 
 def change_last(ids, id, val: str):
     sql.execute(f"SELECT id FROM atrib{ids} WHERE id = ?", (id,))
     if sql.fetchone() is None:
+        event("INT_TABLE")
         sql.execute(f"INSERT INTO atrib{ids} VALUES (?, ?, ?, ?, ?, ?)", (id, None, val, 0, 0, 0))
     else:
         sql.execute(f"UPDATE atrib{ids} SET lastcode = \"{val}\" WHERE id = '{id}'")
     db.commit()
+    event("CHANGE_TABLE", ids)
     return f"yes"
 
 def check_last(ids, id) -> str:
     for val in sql.execute(f"SELECT lastcode FROM atrib{ids} WHERE id = ?", (id,)):
         return val[0]
+    event("CHECK_TABLE", ids)
 
 class Text:
     content="""

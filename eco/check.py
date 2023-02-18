@@ -17,18 +17,19 @@ class CheckCommand(commands.Cog):
         if check(inter.guild.id, user.id, "cash") == None:
             text="Ошибка, такого юзера нету"
         else:
-            cash=check(inter.guild.id, user.id, "cash")
-            bit=check(inter.guild.id, user.id, "bit")
-            bam=check(inter.guild.id, user.id, "bam")
-            prem=check(inter.guild.id, user.id, "prem")
-            ver=check(inter.guild.id, user.id, "ver")
-            coin=check(inter.guild.id, user.id, "coin")
-            man=check(inter.guild.id, user.id, "man")
-            datecreate=check(inter.guild.id, user.id, "datecre")
-            exp=check(inter.guild.id, user.id, "exp")
-            show=check(inter.guild.id, user.id, "show")
-            bitmine=check(inter.guild.id, user.id, "bitmine")
-            cris=check(inter.guild.id, user.id, "cris")
+            che = check(inter.guild.id, user.id, "*")
+            cash = che[1] # 1
+            bit = che[2] # 2
+            bam = che[3] # 3
+            prem = che[4] # 4
+            exp = che[5] # 5
+            bitmine = che[6] # 6
+            man = che[7] # 7
+            datecreate = che[8] # 8
+            coin = che[9] # 9
+            ver = che[10] # 11
+            show = che[11] # 12
+            cris = che[12] # 13
             text=f"```cs\nДеньги: {int(cash):,} $\nБитКоины: {int(bit):,}\nБлокировка: {bool(bam)}\nПремиум статус: {bool(prem)}\nВерификация: {bool(ver)}\nМонеты: {int(coin):,}\nЗвание: {man}\nДата создание: {datecreate}\nОпыта: {exp}\nЗакрытый ли профиль: {bool(show)}\nУровень видео карт: {bitmine}\nКристаллики: {int(cris):,}\n```"
         embed=disnake.Embed(title=f"Информация об {user.name}", description=text, color=check_server_bd(inter.guild.id)[2])
         await inter.response.send_message(embed=embed, ephemeral=True)
