@@ -71,12 +71,6 @@ class Events(commands.Cog):
         elif ctx.author.bot == True: return
         if check_server_bd(ctx.guild.id)[3] == 0:
             return
-        create_bd_cuscom(ctx.guild.id)
-        createbd(ctx.guild.id)
-        create_bd(ctx.guild.id)
-        create(ctx.guild.id, ctx.author.id, 10)
-        int_server_bd(ctx.guild.id)
-        int_user_bd(ctx.author.id)
         if ctx.content.startswith("b!") == True:
             commandName = ctx.content.replace("b!", "").split(" ")[0].lower()
             commandReply = check_command(ctx.guild.id, commandName)
