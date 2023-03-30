@@ -43,7 +43,7 @@ def event(type: str, ids: int, id: int):
                     users.append(u)
                 users.append(id)
                 print(users)
-                change_anw(ids, anw[0], "users", f"'{users}'")
+                change_anw(ids, anw[0], "users", f"{users}")
                 db.commit()
                 print(f"Change {id}")
                 return
