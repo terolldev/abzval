@@ -2,9 +2,7 @@ import disnake
 from disnake.ext import commands
 from disnake.utils import *
 import sqlite3
-import random
-import json
-import time
+from bot.error import *
 import datetime
 from eco.func.func import *
 
@@ -38,18 +36,11 @@ class Events(commands.Cog):
                 embed=disnake.Embed(title=f"{interaction.message.content} Является модератором бота", 
                 description=f"Данный пользователь модератор бота", 
                 color=check_server_bd(interaction.guild.id)[2]), ephemeral=True)
+            elif interaction.component.custom_id == "cancle" or "confirm" or "cancle1" or "confirm1": return
             else:
-                embed=disnake.Embed(description=f"**Причина:**\n> Данное взаимодействие более не доступно!",
-                color=check_server_bd(interaction.guild.id)[1], timestamp=datetime.datetime.now())
-                embed.set_author(name='Извините', icon_url='https://cdn.discordapp.com/attachments/959338373988900934/959396824173658132/749876351628083221.gif')
-                embed.set_footer(text=f"{interaction.author}", icon_url=f"{interaction.author.avatar}")
-                await interaction.response.send_message(embed=embed, ephemeral=True)
+                await Message.sendError(interaction, "Данное взаимодействие более не доступно!")
         except Exception as er:
-            embed=disnake.Embed(description=f"**Причина:**\n> Ошибка ответа на взаимодействие!",
-            color=check_server_bd(interaction.guild.id)[1], timestamp=datetime.datetime.now())
-            embed.set_author(name='Извините', icon_url='https://cdn.discordapp.com/attachments/959338373988900934/959396824173658132/749876351628083221.gif')
-            embed.set_footer(text=f"{er}", icon_url=f"{interaction.author.avatar}")
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+            await Message.sendError(interaction, "Ошибка ответа на взаимодействие!")
 
     @commands.Cog.listener()
     async def on_slash_command_completion(cog, ctx: disnake.Message):

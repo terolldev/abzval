@@ -1,11 +1,10 @@
 import disnake
 from disnake.ext import tasks, commands
-import datetime
-import os
 from eco.func.func import *
 from script.guild_check import guild_check
 from script.voice_check import voice_check
 from script.load_ext import load_ext
+from script.user_check import user_check192
 
 
 intents = disnake.Intents.all()
@@ -29,6 +28,19 @@ async def on_ready():
     print(f"[{name}]: Бот запустился")
     voice_check.start(bot)
     guild_check.start(bot)
+    user_check192.start(bot)
+
+@bot.event
+async def on_message(ctx):
+    print(f"""
+Content: {ctx.content}
+File: {ctx.attachments}
+Type: {ctx.type}
+Activity: {ctx.activity}
+Compontents: {ctx.components}
+Nonce: {ctx.nonce}
+Flags: {ctx.flags}
+""")
 
 @bot.command()
 async def ban_server(ctx, id: int):
@@ -45,4 +57,4 @@ create_server_bd()
 create_bd_user()
 load_ext(bot)
 
-bot.run("MTA3MTA3NDUwNDkxMjE1NDc0Ng.GOJTcA.6oRuI7bNhk6INEKDrmCixqBWY1AMY82bl5P19E")
+bot.run("MTA3MTA3NDUwNDkxMjE1NDc0Ng.Gan5Zc.KY6TWK7C-lWi6ObpeGvXd2DGbA6J4aHATEzS2o")

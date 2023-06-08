@@ -1,14 +1,11 @@
-import os
 import datetime
 from script.event import *
 import sqlite3
 import disnake
 bd = 'bd.db'
-
+ex="$"
 db = sqlite3.connect(bd)
 sql = db.cursor()
-
-ex="$"
 
 def create(ids: int, id: int, tot: int):
     sql.execute(f"SELECT id FROM user{ids} WHERE id = ?", (id,))
@@ -18,14 +15,15 @@ def create(ids: int, id: int, tot: int):
         bit = 0
         exp = 0
         bitmine = 0
-        use = 0
         coin = 0
         pay = 0
         ver = 0
-        man = '"Рядовой"'
+        man = '"Пусто"'
         show = 0
         cris = 0
-        sql.execute(f"INSERT INTO user{ids} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (id, tot, bit, bam, prem, exp, bitmine, man, f"{datetime.datetime.now()}", coin, pay, ver, show, cris))
+        inventory = '{}'
+        lastact = 0
+        sql.execute(f"INSERT INTO user{ids} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (id, tot, bit, bam, prem, exp, bitmine, man, f"{datetime.datetime.now()}", coin, pay, ver, show, cris, inventory, lastact))
         db.commit()
         event("INT_TABLE", ids, id)
     else:
@@ -38,12 +36,14 @@ class ValueinBd():
         "cash": "Баланс юзера", "bit": "Биткоины юзера", "bam": "Забанен ли?", "prem": "Есть ли премиум?",
         "exp": "Опыт (уровень это -> round(exp/100) )", "bitmine": "Улучшение видео-карт", 
         "use": "использован ли промо-код?", "coin": "Коины юзера", "pay": "заблокированы ли платежы?", "ver": "является ли верифицированным?",
-        "man": "Ранг человека", "show": "Возможность просмотреть профиль", "cris": "кристаллики юзера"
+        "man": "Ранг человека", "show": "Возможность просмотреть профиль", "cris": "кристаллики юзера", "inventory": "Инвентарь в JSON формате",
+        "lastact": "Последняя активность участника в Unixtimestamp"
     }
+    uniitem = {"1337": {"sell": 100_000, "buy": 100_000, "des": "крутая тема покупай"}}
 
 def check(ids: int, id: int, type: str):
     event("SELECT", ids, id)
-    for val in sql.execute(f"SELECT {type} FROM user{ids} WHERE id = ?", (id,)): # type: ignore
+    for val in sql.execute(f"SELECT {type} FROM user{ids} WHERE id = ?", (id,)):
         if type == "*":return val
         else:return val[0]
 
@@ -57,22 +57,36 @@ def create_bd(id):
     total_commands BIGINT
     )""")
 
+def create_bd_item(ids):
+    sql.execute(f"""CREATE TABLE IF NOT EXISTS items{ids} (
+    name TEXT,
+    des TEXT,
+    sell BIGINT,
+    buy BIGINT,
+    usage INT DEFAULT 1,
+    type INT,
+    typeid BIGINT,
+    icon TEXT
+    )""")
+
 def createbd(ids: int):
     sql.execute(f"""CREATE TABLE IF NOT EXISTS user{ids} (
     id BIGINT,
-    cash BIGINT,
-    bit BIGINT,
-    bam INT,
-    prem INT,
-    exp BIGINT,
-    bitmine INT,
-    man TEXT,
+    cash BIGINT DEFAULT 10,
+    bit BIGINT DEFAULT 0,
+    bam INT DEFAULT 0,
+    prem INT DEFAULT 0,
+    exp BIGINT DEFAULT 0,
+    bitmine INT DEFAULT 0,
+    man TEXT NOT NULL,
     datecre TEXT,
-    coin INT,
-    pay INT,
-    ver INT,
-    show INT,
-    cris BIGINT
+    coin INT DEFAULT 0,
+    pay INT DEFAULT 0,
+    ver INT DEFAULT 0,
+    show INT DEFAULT 0,
+    cris BIGINT DEFAULT 0,
+    inventory TEXT,
+    lastact BIGINT
 )""")
 
 def create_bd_anw(ids):
@@ -96,10 +110,12 @@ def create_bd_cuscom(ids):
 def create_bd_user():
     sql.execute(f"""CREATE TABLE IF NOT EXISTS globaluser (
     id BIGINT,
-    prems INT,
-    ban INT,
-    mod INT,
-    tester INT
+    prems INT DEFAULT 0,
+    ban INT DEFAULT 0,
+    mod INT DEFAULT 0,
+    tester INT DEFAULT 0,
+    busting INT DEFAULT 0,
+    endbusitng BIGINT DEFAULT 0
     )""")
 
 def create_server_bd():
@@ -107,27 +123,60 @@ def create_server_bd():
     id BIGINT,
     dcolor INT,
     color INT,
-    command INT,
-    slash INT,
-    prem INT,
-    eco INT,
-    ban INT,
-    item INT,
-    limitcash BIGINT,
-    limitbit BIGINT,
-    limitcoin BIGINT,
-    enddate BIGINT,
+    command INT DEFAULT 1,
+    slash INT DEFAULT 0,
+    prem INT DEFAULT 0,
+    eco INT DEFAULT 1,
+    ban INT DEFAULT 0,
+    item INT DEFAULT 1,
+    limitcash BIGINT DEFAULT 100000,
+    limitbit BIGINT DEFAULT 10000,
+    limitcoin BIGINT DEFAULT 100,
+    enddate BIGINT DEFAULT 0,
     welcome TEXT,
     goodboy TEXT,
     channel BIGINT
     )
     """)
 
+def checkInventory(ids, id)->dict:
+    for value in sql.execute(f"SELECT inventory FROM user{ids} WHERE id = ?", (id,)):
+        inve = value[0].replace('"', '\"')
+        inv = eval(inve)
+        return inv
+    
+def addInventory(ids, id, item: str):
+    inv = checkInventory(ids, id)
+    count=1
+    if item in inv:
+        count = inv[f"{item}"]+count
+    inv.update({f"{item}": count})
+    inv = f"{inv}".replace('"', "'")
+    sql.execute(f"UPDATE user{ids} SET inventory = \"{inv}\" WHERE id = {id}")
+
+def takeInventory(ids, id, item):
+    inv = checkInventory(ids, id)
+    count=1
+    if item in inv:
+        if inv[f"{item}"] == 1: 
+            removeInventory(ids, id, item)
+            return
+        count = inv[f"{item}"]-count
+    inv.update({f"{item}": count})
+    inv = f"{inv}".replace('"', "'")
+    sql.execute(f"UPDATE user{ids} SET inventory = \"{inv}\" WHERE id = {id}")
+
+def removeInventory(ids, id, item: str):
+    inv = checkInventory(ids, id)
+    inv.pop(item)
+    inv = f"{inv}".replace('"', "'")
+    sql.execute(f"UPDATE user{ids} SET inventory = \"{inv}\" WHERE id = {id}")
+    
 def int_server_bd(ids: int):
     sql.execute(f"SELECT id FROM global WHERE id = ?", (ids,))
     if sql.fetchone() is None:
         sql.execute(f"INSERT INTO global VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, 0xed4947, 0x5865F2, 1, 0, 0, 1, 0, 1,
-        100_000, 1_000, 100, 0, "Привет {{username}}, мы рады тебя видеть!", "Увы {{username}} вышел, будет надеется что он вернётся", 0))
+        100_000, 1_000, 100, 0, "Привет {{username}}, мы рады тебя видеть!", "Увы {{username}} вышел, будем надеется что он вернётся", 0))
     db.commit()
     event("INT_TABLE", ids, None)
     
@@ -135,7 +184,7 @@ def int_server_bd(ids: int):
 def int_user_bd(id: int):
     sql.execute(f"SELECT id FROM globaluser WHERE id = ?", (id,))
     if sql.fetchone() is None:
-        sql.execute(f"INSERT INTO globaluser VALUES (?, ?, ?, ?, ?)", (id, 0, 0, 0, 0 ))
+        sql.execute(f"INSERT INTO globaluser VALUES (?, ?, ?, ?, ?, ?, ?)", (id, 0, 0, 0, 0, 0, 0))
     db.commit()
 
 def change_server_bd(ids: int, type: str, value: str | int):
@@ -152,11 +201,11 @@ def change_server_bd(ids: int, type: str, value: str | int):
     db.commit()
     event("CHANGE_TABLE", ids, None)
 
-def change_user_bd(id: int, type: str, value: str | int):
+def change_user_bd(id: int, type: str, value: int):
     sql.execute(f"SELECT id FROM globaluser WHERE id = ?", (id,))
     if sql.fetchone() is None:
         event("INT_TABLE")
-        sql.execute(f"INSERT INTO globaluser VALUES (?, ?, ?, ?, ?)", (id, 0, 0, 0, 0 ))
+        sql.execute(f"INSERT INTO globaluser VALUES (?, ?, ?, ?, ?, ?, ?)", (id, 0, 0, 0, 0, 0, 0))
     sql.execute(f"UPDATE globaluser SET {type} = {value} WHERE id = ?", (id,))
     db.commit()
 
@@ -186,11 +235,16 @@ def check_anw(ids, name) -> object:
     event("CHECK_TABLE", ids, None)
 
 def change_anw(ids, name, type, value):
+    print(f"UPDATE anw{ids} SET {type} = '{value}' WHERE name = '{name}'")
     sql.execute(f"SELECT name FROM anw{ids} WHERE name = ?", (name,))
     if sql.fetchone() is None:
         return "cin"
     else:
-        sql.execute(f"UPDATE anw{ids} SET {type} = {value} WHERE name = ?", (name,))
+        print(value.__class__)
+        if value.__class__ == "str":
+            sql.execute(f"UPDATE anw{ids} SET {type} = '{value}' WHERE name = '{name}'")
+        else:
+            sql.execute(f"UPDATE anw{ids} SET {type} = {value} WHERE name = '{name}'")
     db.commit()
 
 def delete_anw(ids, name):

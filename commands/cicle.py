@@ -2,10 +2,7 @@ import disnake
 from disnake.ext import commands
 from disnake.utils import *
 import sqlite3
-import random
-import json
-import time
-import datetime
+from bot.error import *
 from eco.func.func import *
 
 bot = commands.InteractionBot()
@@ -64,24 +61,27 @@ class Cicle(commands.Cog):
     async def statis(self, inter, user: disnake.User=None):
         if user == None: user = inter.author
         if user.bot == True:
-            embed=disnake.Embed(description=f"**Причина:**\n> Это бот!",
-            color=check_server_bd(inter.guild.id)[1], timestamp=datetime.datetime.now())
-            embed.set_author(name='Ошибка', icon_url='https://cdn.discordapp.com/attachments/959338373988900934/959396824173658132/749876351628083221.gif')
-            embed.set_footer(text=f"{inter.author}", icon_url=f"{inter.author.avatar}")
-            return await inter.response.send_message(embed=embed, ephemeral=True)
+            return await Message.sendError(inter, "Это бот!")
+        elif check_user(inter.guild.id, user.id, "act") == None:
+            return await Message.sendError(inter, "Этот пользователь нечего не делал на сервере")
         create_use(inter.guild.id, inter.author.id)
         one = check_user(inter.guild.id, user.id, "act")
         sec = one % (24 * 3600) 
-        hour = sec // 3600 
+        hour = sec // 3600
         sec %= 3600 
         min = sec // 60 
         sec %= 60
+        texta = f"{min} Минут"
+        if one > 86400:
+            texta = f"{int(one/3600/24)} Дней, {hour} Часов, {min} Минут"
+        elif one > 3600:
+            texta = f"{hour} Часов, {min} Минут"
         tot = check_user(inter.guild.id, user.id, "messages")
         command = check_user(inter.guild.id, user.id, "total_commands")
         embed=disnake.Embed(title=f"Статистика {user.name} [{user.display_name}]", color=check_server_bd(inter.guild.id)[2])
-        embed.add_field(name=f"Активность в голосовых каналах", value=f"{hour} Часов, {min} Минут", inline=True)
+        embed.add_field(name=f"Активность в голосовых каналах", value=f"{texta}", inline=True)
         embed.add_field(name=f"Всего сообщений", value=f"{tot}", inline=True)
-        embed.add_field(name=f"Всего использовал комманд", value=f"{command}", inline=True)
+        embed.add_field(name=f"Всего использовал команд", value=f"{command}", inline=True)
         await inter.response.send_message(embed=embed)
 
 def setup(bot: commands.Bot):

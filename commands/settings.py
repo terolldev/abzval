@@ -2,7 +2,7 @@ import disnake
 from disnake.ext import commands
 from disnake.utils import *
 from eco.func.func import *
-import time
+from bot.error import *
 from disnake import TextInputStyle
 
 bot = commands.InteractionBot()
@@ -31,8 +31,8 @@ class Val(disnake.ui.Modal):
             change_server_bd(inter.guild.id, "dcolor", int(inter.text_values['color'], 16))
             await inter.response.send_message(embed=disnake.Embed(description=f"Вы изменили цвет ошибок на: `{inter.text_values['color']}`", color=int(inter.text_values['color'], 16)), ephemeral=1)
         except:
-            await inter.response.send_message(embed=disnake.Embed(description=f"Ошибка! Укажите цифровой код цвета!", color=int(check_server_bd(inter.guild.id)[1])), ephemeral=1)
-
+            await Message.sendError(inter, "Ошибка укажите верный цифровой код цвета")
+            
 class Limit(disnake.ui.Modal):
       def __init__(self, interaction):
         lim = check_server_bd(interaction.guild.id)
@@ -116,8 +116,7 @@ class Val1(disnake.ui.Modal):
             change_server_bd(inter.guild.id, "color", int(inter.text_values['color'], 16))
             await inter.response.send_message(embed=disnake.Embed(description=f"Вы изменили цвет сообщений на: `{inter.text_values['color']}`", color=int(inter.text_values['color'], 16)), ephemeral=1)
         except:
-            await inter.response.send_message(embed=disnake.Embed(description=f"Ошибка! Укажите цифровой код цвета!", color=int(check_server_bd(inter.guild.id)[1])), ephemeral=1)
-
+            await Message.sendError(inter, "Ошибка укажите верный цифровой код цвета")
 class Set(disnake.ui.View):
     def __init__(self):
         super().__init__(timeout=60)

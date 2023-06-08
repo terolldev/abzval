@@ -19,6 +19,7 @@ class BjSystem(disnake.ui.View):
         card1 = random.randint(4, 10)
         bjcashe.update({interaction.author.id: [bjcashe[interaction.author.id][0], bjcashe[interaction.author.id][1]+card1, bjcashe[interaction.author.id][2]]})
         if bjcashe[interaction.author.id][0] == bjcashe[interaction.author.id][1]:
+                date = bjcashe[interaction.author.id]
                 embed=disnake.Embed(title=f"Выпала карта: {card}", description=f"Ничья\nВаш счёт: {date[0]}\nСчёт противника: {date[1]}")
                 newcash = check(interaction.guild.id, interaction.author.id, "cash") - bjcashe[interaction.author.id][2]
                 sql.execute(f"UPDATE user{interaction.guild.id} SET cash = {newcash} WHERE id = '{interaction.author.id}'")

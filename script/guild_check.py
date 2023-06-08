@@ -3,7 +3,6 @@ from eco.func.func import *
 
 @tasks.loop(minutes=5.0) 
 async def guild_check(bot: commands.InteractionBot):
-    print("START!")
     for guilds in bot.guilds:
         for channel in guilds.text_channels:
             create_bd_cuscom(channel.guild.id)

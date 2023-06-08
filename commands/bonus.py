@@ -2,6 +2,7 @@ import disnake
 from disnake.ext import commands
 from disnake.utils import *
 from eco.func.func import *
+from bot.error import *
 
 bot = commands.InteractionBot()
 
@@ -25,11 +26,7 @@ class BonusCommand(commands.Cog):
     @bonus.sub_command(description="Выдать бонус на сервере")
     async def give(self, inter):
         if check_user_bd(inter.author.id)[1] < 1:
-            embed=disnake.Embed(description=f"**Причина:**\n> У вас нету бонусов!",
-            color=check_server_bd(inter.guild.id)[1], timestamp=datetime.datetime.now())
-            embed.set_author(name='Извините', icon_url='https://cdn.discordapp.com/attachments/959338373988900934/959396824173658132/749876351628083221.gif')
-            embed.set_footer(text=f"{inter.author}", icon_url=f"{inter.author.avatar}")
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            Message.sendError(inter, "У вас нету бонусов!")
         else:
             if check_server_bd(inter.guild.id)[12] == 0:
                 dateman = int(datetime.datetime.now().timestamp()+2419200)
@@ -38,6 +35,8 @@ class BonusCommand(commands.Cog):
             change_server_bd(inter.guild.id, "enddate", dateman)
             change_user_bd(inter.author.id, "prems", int(check_user_bd(inter.author.id)[1]-1))
             change_server_bd(inter.guild.id, "prem", 1)
+            change_user_bd(inter.author.id, "endbusitng", dateman)
+            change_user_bd(inter.author.id, "busting", 1)
             embed=disnake.Embed(title=f"Вы выдали бонус на сервер [{inter.guild.name}]", 
             description=f"Он пропадёт <t:{dateman}:R>", color=check_server_bd(inter.guild.id)[2])
             await inter.response.send_message(embed=embed)

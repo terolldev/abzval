@@ -1,16 +1,20 @@
 import sqlite3
-import json
 bd = 'bd.db'
 
 db = sqlite3.connect(bd)
 sql = db.cursor()
 
 def change_anw(ids, name, type, value):
+    print(f"UPDATE anw{ids} SET {type} = '{value}' WHERE name = '{name}'")
     sql.execute(f"SELECT name FROM anw{ids} WHERE name = ?", (name,))
     if sql.fetchone() is None:
         return "cin"
     else:
-        sql.execute(f"UPDATE anw{ids} SET {type} = {value} WHERE name = ?", (name,))
+        print(value.__class__)
+        if value.__class__ == "str":
+            sql.execute(f"UPDATE anw{ids} SET {type} = '{value}' WHERE name = '{name}'")
+        else:
+            sql.execute(f"UPDATE anw{ids} SET {type} = {value} WHERE name = '{name}'")
     db.commit()
 
 def check_user(ids, id, val: str) -> str:
@@ -24,26 +28,23 @@ def check(ids: int, id: int, type: str):
 
 ############################################################################################################
 
-def event(type: str, ids: int, id: int):
-    if id == None:return
-    else:
+def event(type: str, ids: int=None, id: int=None):
+    if ids != None and id is None and type == "CHECK_TABLE":
+        print("create table exist")
+    if (ids, id) != None:
         sql.execute(f"SELECT * FROM anw{ids}")
         for anw in sql.fetchall():
             if f"{id}" in anw[6]: return
-            if "voice_activity" in anw:
-                anw2 = anw[2].replace("voice_activity", "act")
-                c = int(check_user(ids, id, anw2))
-            else:c = int(check_user(ids, id, anw[2]))
-            if c >= anw[3]:
+            if anw[5] >= anw[3]:
                 count = check(ids, id, anw[4])
+                print(count)
                 sql.execute(f"UPDATE user{ids} SET {anw[4]} = {int(count+anw[5])}")
                 users = []
-                user = anw[6].replace("[", "").replace("]", "").split(",")
+                user = eval(anw[6])
                 for u in user:
                     users.append(u)
                 users.append(id)
-                print(users)
-                change_anw(ids, anw[0], "users", f"{users}")
+                sql.execute(f"UPDATE anw{ids} SET users = '{users}' WHERE name = '{anw[0]}'")
                 db.commit()
                 print(f"Change {id}")
                 return

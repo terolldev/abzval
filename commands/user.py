@@ -2,6 +2,7 @@ import disnake
 from disnake.ext import commands
 from disnake.utils import *
 from eco.func.func import *
+from bot.error import *
 
 bot = commands.InteractionBot()
 
@@ -27,11 +28,7 @@ class USer1Command(commands.Cog):
         # 3 = mod
         # 4 = tester
         if user == None:
-            embed=disnake.Embed(description=f"**Причина:**\n> Вы не добавлены в базу данных\nПеревыполните команду!",
-            color=check_server_bd(inter.guild.id)[1], timestamp=datetime.datetime.now())
-            embed.set_author(name='Извините', icon_url='https://cdn.discordapp.com/attachments/959338373988900934/959396824173658132/749876351628083221.gif')
-            embed.set_footer(text=f"{inter.author}", icon_url=f"{inter.author.avatar}")
-            await inter.response.send_message(embed=embed, ephemeral=True)
+            await Message.sendError(inter, "Вы не добавлены в базу данных\nПеревыполните команду!")
         else:
             embed=disnake.Embed(title=f"Информация", description=f"`[`{inter.author.mention}`]`", color=check_server_bd(inter.guild.id)[2])
             embed.add_field(name="Кол-во бонусов", value=f"{user[1]}", inline=False)

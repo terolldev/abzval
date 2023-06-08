@@ -3,6 +3,7 @@ from disnake.ext import commands
 from disnake.utils import *
 from eco.func.func import *
 from disnake import TextInputStyle
+from bot.error import *
 
 bot = commands.InteractionBot()
 

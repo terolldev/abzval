@@ -6,7 +6,7 @@ import sqlite3
 import requests
 import time
 import json
-import random
+from bot.error import *
 from disnake.utils import *
 from eco.func.func import *
 

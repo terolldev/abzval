@@ -40,13 +40,15 @@ class StatsCommand(commands.Cog):
     @commands.cooldown(rate=1, per=10, type=commands.BucketType.user)
     @bot.slash_command(description="Show server statistic")
     async def dev_stats(self, interaction):
-        embed=disnake.Embed(title=f"Statistic for Server: Reserve host", color=check_server_bd(interaction.guild.id)[2])
+        embed=disnake.Embed(title=f"Statistic for Server: localhost", color=check_server_bd(interaction.guild.id)[2])
         try:
-            ma = round(psutil.virtual_memory().percent,1)
+            cpu = psutil.cpu_count()
+            cpuusage = psutil.cpu_percent()
+            ma = int(round(psutil.virtual_memory().percent,1) / 3.5)
             ma1 = round(psutil.boot_time(),1)
             a = round(psutil.swap_memory().used,1)
             y = round(psutil.swap_memory().total,1)
-            me_tot = int(a/1024/1024)
+            me_tot = int(a/1024/1024/1024*10+14)
             sPing = round(self.bot.latency * 100,1)
             rPing = round(self.bot.latency * 222,1)
             embed.add_field(name='Base load', value=f'```cs\n{int(ma/4)}%\n```', inline=True)
@@ -55,6 +57,7 @@ class StatsCommand(commands.Cog):
             embed.add_field(name="Memory used all service", value=f"```cs\n{me_tot} MB [{ma}%]\n```", inline=True)
             embed.add_field(name="Ping server", value=f"```cs\n{int(sPing)} MS\n```", inline=True)
             embed.add_field(name="Ping reg.interaction", value=f"```cs\n{int(rPing)} MS\n```", inline=True)
+            embed.add_field(name="CPU", value=f"```cs\nCount: {cpu}, Usage: {cpuusage}%\n```", inline=True)
             # Error handler/
         except Exception as er:embed.add_field(name="Error", value=f"```\n{er}\n```", inline=True) 
         await interaction.response.send_message(embed=embed, ephemeral=True)
