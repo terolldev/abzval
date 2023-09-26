@@ -37,7 +37,6 @@ def event(type: str, ids: int=None, id: int=None):
             if f"{id}" in anw[6]: return
             if anw[5] >= anw[3]:
                 count = check(ids, id, anw[4])
-                print(count)
                 sql.execute(f"UPDATE user{ids} SET {anw[4]} = {int(count+anw[5])}")
                 users = []
                 user = eval(anw[6])

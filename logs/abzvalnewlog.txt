@@ -1,0 +1,10 @@
+GUILD: 1044340714932293724, AUTHOR: 1132417579051393184, 
+--------------------
+DATABSE: atrib GUILD LOCALE DATABASE, VALUE: total_commands, COUNT: 53, REASON: Изменили участника в гильдии
+_____________________________
+
+GUILD: 1044340714932293724, AUTHOR: this is GUILD, 
+--------------------
+DATABSE: global, VALUE: null, COUNT: null, REASON: запись сервера в базу достижений
+_____________________________
+

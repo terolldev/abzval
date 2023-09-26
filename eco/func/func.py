@@ -1,5 +1,6 @@
 import datetime
 from script.event import *
+from script.log import *
 import sqlite3
 import disnake
 bd = 'bd.db'
@@ -153,6 +154,7 @@ def addInventory(ids, id, item: str):
     inv.update({f"{item}": count})
     inv = f"{inv}".replace('"', "'")
     sql.execute(f"UPDATE user{ids} SET inventory = \"{inv}\" WHERE id = {id}")
+    logging(id, ids, "inventory, users, guild", f'inventory({item})', count, "покупка/выдача предмета")
 
 def takeInventory(ids, id, item):
     inv = checkInventory(ids, id)
@@ -165,12 +167,14 @@ def takeInventory(ids, id, item):
     inv.update({f"{item}": count})
     inv = f"{inv}".replace('"', "'")
     sql.execute(f"UPDATE user{ids} SET inventory = \"{inv}\" WHERE id = {id}")
+    logging(id, ids, "inventory, users, guild", f"inventory({item})", count, "продажа/ремув")
 
 def removeInventory(ids, id, item: str):
     inv = checkInventory(ids, id)
     inv.pop(item)
     inv = f"{inv}".replace('"', "'")
     sql.execute(f"UPDATE user{ids} SET inventory = \"{inv}\" WHERE id = {id}")
+    logging(id, ids, "inventory, users, guild", f"inventory({item})", "null", "Предмет закончился в инвентаре")
     
 def int_server_bd(ids: int):
     sql.execute(f"SELECT id FROM global WHERE id = ?", (ids,))
@@ -178,6 +182,7 @@ def int_server_bd(ids: int):
         sql.execute(f"INSERT INTO global VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, 0xed4947, 0x5865F2, 1, 0, 0, 1, 0, 1,
         100_000, 1_000, 100, 0, "Привет {{username}}, мы рады тебя видеть!", "Увы {{username}} вышел, будем надеется что он вернётся", 0))
     db.commit()
+    logging("this is GUILD", ids, "global", "null", "null", "запись сервера в базу достижений")
     event("INT_TABLE", ids, None)
     
 
@@ -199,6 +204,7 @@ def change_server_bd(ids: int, type: str, value: str | int):
     else:
         sql.execute(f"UPDATE global SET {type} = {value} WHERE id = {ids}")
     db.commit()
+    logging("this is GUILD", ids, "global", type, value, "Сеттингс чейндж")
     event("CHANGE_TABLE", ids, None)
 
 def change_user_bd(id: int, type: str, value: int):
@@ -207,6 +213,7 @@ def change_user_bd(id: int, type: str, value: int):
         event("INT_TABLE")
         sql.execute(f"INSERT INTO globaluser VALUES (?, ?, ?, ?, ?, ?, ?)", (id, 0, 0, 0, 0, 0, 0))
     sql.execute(f"UPDATE globaluser SET {type} = {value} WHERE id = ?", (id,))
+    logging(id, "this is global DATABASE", "globaluser", type, value, "Изменение глобал статы юзера")
     db.commit()
 
 def check_server_bd(ids: int) -> object:
@@ -228,6 +235,7 @@ def create_anw(ids, name, des, fore, count, forg, countg):
     if sql.fetchone() is None:
         sql.execute(f"INSERT INTO anw{ids} VALUES (?, ?, ?, ?, ?, ?, ?)", (name, des, fore, count, forg, countg, '[]'))
     db.commit()
+    logging("this is GUILD", ids, "anw GUILD LOCAL DATABASE", f"{name}, {des}, {fore}, {count}, {forg}, {countg}", "null", "Создали достижение")
 
 def check_anw(ids, name) -> object:
     for val in sql.execute(f"SELECT * FROM anw{ids} WHERE name = ?", (name,)):
@@ -246,6 +254,7 @@ def change_anw(ids, name, type, value):
         else:
             sql.execute(f"UPDATE anw{ids} SET {type} = {value} WHERE name = '{name}'")
     db.commit()
+    logging("this is GUILD", ids, "anw GUILD LOCALE DATABASE", type, value, "Изменение достижение")
 
 def delete_anw(ids, name):
     sql.execute(f"SELECT name FROM anw{ids} WHERE name = ?", (name,))
@@ -254,6 +263,7 @@ def delete_anw(ids, name):
     else:
         sql.execute(f"DELETE FROM anw{ids} WHERE name = ('{name}')")
         db.commit()
+        logging("this is GUILD", ids, "anw GUILD LOCALE DATABASE", name, "null", "Удалили достижение")
 
 def create_command(ids, name, reply: str, description: str):
     sql.execute(f"SELECT name FROM cuscom{ids} WHERE name = ?", (name,))
@@ -263,6 +273,7 @@ def create_command(ids, name, reply: str, description: str):
         return "ciac"
     db.commit()
     event("INT_TABLE", ids, None)
+    logging("this is GUILD", ids, "cuscom GUILD LOCALE DATABASE", f"{name}, {reply}, {description}", "null", "создали команду")
     return f"yes"
 
 def change_command(ids, name, newreply, description):
@@ -273,7 +284,8 @@ def change_command(ids, name, newreply, description):
         sql.execute(f"UPDATE cuscom{ids} SET reply = \'{newreply}\' WHERE name = ?", (name,))
         sql.execute(f"UPDATE cuscom{ids} SET description = \'{description}\' WHERE name = ?", (name,))
     db.commit()
-    event("CHANGE_TABLE", ids), None
+    event("CHANGE_TABLE", ids, None)
+    logging("this is GUILD", ids, "cuscom GUILD LOCALE DATABASE", f"{name}, {newreply}, {description}", "null", "Изменили команду")
 
 def delete_command(ids, name):
     sql.execute(f"SELECT name FROM cuscom{ids} WHERE name = ?", (name,))
@@ -282,6 +294,7 @@ def delete_command(ids, name):
     else:
         sql.execute(f"DELETE FROM cuscom{ids} WHERE name = ('{name}')")
         db.commit()
+        logging("this is GUILD", ids, "cuscom GUILD LOCALE DATABASE", f"{name}", "null", "Удалил команду")
 # -------
 
 def fora(text: str, ctx: disnake.Message) -> str:
@@ -325,6 +338,7 @@ def change_user(ids, id, val: str):
         sql.execute(f"UPDATE atrib{ids} SET str = {val} WHERE id = '{id}'")
     db.commit()
     event("CHANGE_TABLE", ids, id)
+    logging(id, ids, "atrib GUILD LOCALE DATABASE", val, "null", "Изменили участника ( str )")
     return f"yes"
 
 def create_use(ids, id):
@@ -332,6 +346,7 @@ def create_use(ids, id):
     if sql.fetchone() is None:
         sql.execute(f"INSERT INTO atrib{ids} VALUES (?, ?, ?, ?, ?, ?)", (id, None, None, 0, 0, 0))
         event("INT_TABLE", ids, id)
+        logging(id, ids, "atrib GUILD LOCALE DATABASE", "null", "null", "Создали участника (atrib)")
 
 def add_user(ids, id, val: str, value: int):
     sql.execute(f"SELECT id from atrib{ids} WHERE id = ?", (id,))
@@ -342,6 +357,7 @@ def add_user(ids, id, val: str, value: int):
         sql.execute(f"UPDATE atrib{ids} SET {val} = {value} WHERE id = '{id}'")
     db.commit()
     event("CHANGE_TABLE", ids, id)
+    logging(id, ids, "atrib GUILD LOCALE DATABASE", val, value, "Изменили участника в гильдии")
 
 def change_last(ids, id, val: str):
     sql.execute(f"SELECT id FROM atrib{ids} WHERE id = ?", (id,))
@@ -352,6 +368,7 @@ def change_last(ids, id, val: str):
         sql.execute(f"UPDATE atrib{ids} SET lastcode = \"{val}\" WHERE id = '{id}'")
     db.commit()
     event("CHANGE_TABLE", ids, id)
+    logging(id, ids, "atrib GUILD LOCALE DATABASE", val, "null", "Изменили ласт код юзера в гильдии")
     return f"yes"
 
 def check_last(ids, id) -> str:

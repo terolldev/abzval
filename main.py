@@ -22,25 +22,13 @@ async def on_ready():
     await bot.change_presence(
             activity=disnake.Streaming(
                 name=f'XD | :)',
-                 url='https://www.twitch.tv/timeigep', twitch_name="discord", game="Minecraft"))
+                 url='https://www.twitch.tv/tim_eiger', twitch_name="discord", game="Minecraft"))
     print(f"[SAPI]: Статус загружен")
     name=bot.user.name
     print(f"[{name}]: Бот запустился")
     voice_check.start(bot)
     guild_check.start(bot)
     user_check192.start(bot)
-
-@bot.event
-async def on_message(ctx):
-    print(f"""
-Content: {ctx.content}
-File: {ctx.attachments}
-Type: {ctx.type}
-Activity: {ctx.activity}
-Compontents: {ctx.components}
-Nonce: {ctx.nonce}
-Flags: {ctx.flags}
-""")
 
 @bot.command()
 async def ban_server(ctx, id: int):
